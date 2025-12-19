@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      body { background: #f8f9fa; padding: 20px; }
+      .card-cocina { border-left: 5px solid #ffc107; margin-bottom: 10px; }
+      .delivery-badge { background-color: #dc3545; color: white; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2 class="text-center mb-4">Picantería System 🔥</h2>
+      
+      <div class="row">
+        <div class="col-md-5">
+          <div class="card p-4 shadow-sm">
+            <h4>Nueva Venta</h4>
+            <div class="mb-3">
+              <label>Producto</label>
+              <input type="text" id="producto" class="form-control" placeholder="Ej: Encebollado Mix">
+            </div>
+            <div class="mb-3">
+              <label>Cantidad</label>
+              <input type="number" id="cantidad" class="form-control" value="1">
+            </div>
+            <div class="mb-3">
+              <label>Tipo de Entrega</label>
+              <select id="tipo" class="form-select">
+                <option value="Local">Para comer aquí</option>
+                <option value="Delivery">Delivery App</option>
+                <option value="Domicilio">Domicilio Propio</option>
+              </select>
+            </div>
+            <button onclick="enviarPedido()" class="btn btn-primary w-100">Enviar a Cocina</button>
+          </div>
+        </div>
+
+        <div class="col-md-7">
+          <h4>Monitor de Cocina 👨‍🍳</h4>
+          <div id="lista-cocina">
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function enviarPedido() {
+        const datos = {
+          producto: document.getElementById('producto').value,
+          cantidad: document.getElementById('cantidad').value,
+          tipo: document.getElementById('tipo').value,
+          precio: 5.00 // Aquí puedes dinamizar con tu tabla de productos
+        };
+        
+        google.script.run.withSuccessHandler(() => {
+          alert("¡Pedido enviado!");
+          cargarCocina();
+        }).registrarPedido(datos);
+      }
+
+      function cargarCocina() {
+        google.script.run.withSuccessHandler(pedidos => {
+          const contenedor = document.getElementById('lista-cocina');
+          contenedor.innerHTML = "";
+          pedidos.forEach(p => {
+            contenedor.innerHTML += `
+              <div class="card card-cocina p-3 shadow-sm">
+                <div class="d-flex justify-content-between">
+                  <h5>${p.cantidad}x ${p.producto}</h5>
+                  <span class="badge delivery-badge">${p.tipo}</span>
+                </div>
+                <button onclick="completar('${p.id}')" class="btn btn-sm btn-success mt-2">Marcar Listo</button>
+              </div>`;
+          });
+        }).obtenerPedidosPendientes();
+      }
+
+      function completar(id) {
+        google.script.run.withSuccessHandler(cargarCocina).marcarComoListo(id);
+      }
+
+      // Recargar cocina cada 30 segundos
+      setInterval(cargarCocina, 30000);
+      window.onload = cargarCocina;
+    </script>
+  </body>
+</html>
