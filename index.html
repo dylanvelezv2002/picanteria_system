@@ -1,239 +1,402 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
   <head>
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Picantería v2.0</title>
+    <title>POS | PUERTO GUARANDA</title>
     
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
       :root {
-        --primary: #d35400; /* Naranja Picantería */
-        --dark: #2c3e50;    /* Azul Oscuro */
-        --light: #f4f6f9;
-        --success: #27ae60;
+        /* PALETA CORPORATIVA PUERTO GUARANDA */
+        --brand-dark: #0f172a;   /* Azul Noche (Sidebar) */
+        --brand-primary: #334155; /* Gris Azulado (Headers) */
+        --brand-accent: #0284c7;  /* Azul Acción (Botones) */
+        --brand-danger: #ef4444;
+        --brand-success: #10b981;
+        --bg-main: #f1f5f9;       /* Fondo Gris muy claro */
+        --border-color: #e2e8f0;
       }
 
-      body { background-color: var(--light); font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-      
-      /* LAYOUT */
-      #wrapper { display: flex; width: 100%; height: 100vh; }
-      
-      /* SIDEBAR */
-      #sidebar {
-        min-width: 260px; max-width: 260px;
-        background: var(--dark); color: #fff;
-        transition: all 0.3s;
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-main);
+        color: #334155;
+        overflow: hidden; /* App feel */
+        height: 100vh;
       }
-      .sidebar-header { padding: 20px; background: rgba(0,0,0,0.2); text-align: center; border-bottom: 3px solid var(--primary); }
-      .menu-btn {
-        width: 100%; text-align: left; padding: 15px 20px;
-        background: transparent; border: none; color: #bdc3c7;
-        font-size: 1.1rem; transition: 0.2s;
+
+      /* --- LAYOUT ESTRUCTURAL --- */
+      #main-wrapper {
+        display: flex;
+        width: 100%;
+        height: 100%;
       }
-      .menu-btn:hover, .menu-btn.active { background: var(--primary); color: white; padding-left: 25px; }
-      .menu-btn i { width: 30px; }
 
-      /* MAIN CONTENT */
-      #content { width: 100%; overflow-y: auto; padding: 0; display: flex; flex-direction: column; }
-      .top-bar { background: white; padding: 10px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+      /* SIDEBAR NAVEGACIÓN */
+      .sidebar {
+        width: 280px;
+        background-color: var(--brand-dark);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+      }
 
-      /* POS (CAJA) */
+      .brand-header {
+        padding: 25px;
+        background-color: rgba(255,255,255,0.05);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+      .brand-header h4 {
+        margin: 0;
+        font-weight: 700;
+        letter-spacing: 1px;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+      }
+      .brand-header small {
+        color: #94a3b8;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+      }
+
+      .nav-menu {
+        padding: 20px 0;
+        flex-grow: 1;
+      }
+
+      .nav-btn {
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        border: none;
+        color: #cbd5e1;
+        padding: 15px 25px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: 0.2s;
+        border-left: 4px solid transparent;
+      }
+
+      .nav-btn:hover {
+        background-color: rgba(255,255,255,0.05);
+        color: white;
+      }
+
+      .nav-btn.active {
+        background-color: rgba(255,255,255,0.1);
+        color: white;
+        border-left-color: var(--brand-accent);
+      }
+
+      .nav-btn i { width: 25px; text-align: center; margin-right: 10px; }
+
+      /* AREA DE CONTENIDO */
+      .content-area {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .top-header {
+        background: white;
+        height: 60px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 25px;
+      }
+
+      .view-container {
+        padding: 20px;
+        overflow-y: auto;
+        height: calc(100% - 60px);
+      }
+
+      /* --- MODULO POS (VENTAS) --- */
+      .pos-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px; /* Panel izquierdo fluido, Ticket fijo */
+        gap: 20px;
+        height: 100%;
+      }
+
+      .search-bar {
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        padding: 12px;
+        font-size: 1rem;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      }
+
+      /* Tarjetas de Producto - Estilo Minimalista */
       .product-card {
-        cursor: pointer; border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        transition: transform 0.2s; height: 100%;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 0;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.15s;
+        height: 100%;
+        overflow: hidden;
       }
-      .product-card:hover { transform: translateY(-5px); border: 2px solid var(--primary); }
-      .price-badge {
-        position: absolute; top: 10px; right: 10px;
-        background: var(--primary); color: white; padding: 3px 10px;
-        border-radius: 20px; font-weight: bold;
+      .product-card:hover {
+        border-color: var(--brand-accent);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
       }
-      .ticket-panel { height: calc(100vh - 80px); display: flex; flex-direction: column; }
-      .ticket-list { flex-grow: 1; overflow-y: auto; background: white; }
       
-      /* COCINA */
-      .kitchen-card { border-left: 6px solid #f1c40f; margin-bottom: 15px; animation: fadeIn 0.5s; }
-      .kitchen-header { display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
+      .card-img-box {
+        height: 100px;
+        background-color: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 2rem;
+      }
       
-      /* ANIMACIONES */
-      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      .d-none { display: none !important; }
+      .card-info { padding: 12px; }
+      .card-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; color: var(--brand-dark); }
+      .card-price { font-size: 0.95rem; font-weight: 700; color: var(--brand-accent); }
+
+      /* TICKET DE VENTA (Recibo) */
+      .ticket-panel {
+        background: white;
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        border-radius: 6px;
+      }
+      
+      .ticket-header {
+        background-color: var(--brand-primary);
+        color: white;
+        padding: 15px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        display: flex; justify-content: space-between; align-items: center;
+      }
+
+      .ticket-body { flex-grow: 1; overflow-y: auto; padding: 0; }
+      
+      .table-ticket th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #64748b;
+        background: #f8fafc;
+        padding: 10px;
+        border-bottom: 2px solid var(--border-color);
+      }
+      .table-ticket td { vertical-align: middle; padding: 10px; font-size: 0.9rem; }
+
+      .ticket-footer {
+        border-top: 2px solid var(--border-color);
+        padding: 20px;
+        background-color: #f8fafc;
+      }
+      
+      .btn-action {
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        padding: 12px;
+        border-radius: 4px;
+      }
+
+      /* --- COCINA MONITOR (Kanban List) --- */
+      .kitchen-row {
+        background: white;
+        border: 1px solid var(--border-color);
+        margin-bottom: 10px;
+        border-radius: 4px;
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-left: 5px solid #eab308; /* Pendiente */
+      }
+      .kitchen-row.done { border-left-color: var(--brand-success); opacity: 0.6; }
+
+      /* RESPONSIVE TABLET/MOBILE */
+      @media (max-width: 992px) {
+        .pos-grid { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+        .sidebar { position: absolute; height: 100%; z-index: 1000; transform: translateX(-100%); }
+        .sidebar.active { transform: translateX(0); }
+        .ticket-panel { height: 50vh; }
+      }
     </style>
   </head>
   <body>
 
-    <div id="wrapper">
-      <nav id="sidebar">
-        <div class="sidebar-header">
-          <h3><i class="fas fa-utensils"></i> SYSTEM POS</h3>
-          <small>Picantería & Mariscos</small>
+    <div id="main-wrapper">
+      
+      <nav class="sidebar" id="sidebar">
+        <div class="brand-header">
+          <h4>PUERTO GUARANDA</h4>
+          <small>Sistema de Gestión v2.1</small>
         </div>
-        <div class="mt-4">
-          <button class="menu-btn active" onclick="nav('venta')"><i class="fas fa-cash-register"></i> Caja / Ventas</button>
-          <button class="menu-btn" onclick="nav('cocina')"><i class="fas fa-fire-burner"></i> Monitor Cocina</button>
-          <button class="menu-btn" onclick="nav('finanzas')"><i class="fas fa-chart-line"></i> Ingresos / Egresos</button>
-          <button class="menu-btn" onclick="nav('admin')"><i class="fas fa-boxes"></i> Productos</button>
+        <div class="nav-menu">
+          <button class="nav-btn active" onclick="switchView('pos')">
+            <i class="fas fa-cash-register"></i> PUNTO DE VENTA
+          </button>
+          <button class="nav-btn" onclick="switchView('kitchen')">
+            <i class="fas fa-tasks"></i> MONITOR COCINA
+          </button>
+          <button class="nav-btn" onclick="switchView('products')">
+            <i class="fas fa-box-open"></i> INVENTARIO
+          </button>
+          <button class="nav-btn" onclick="switchView('finance')">
+            <i class="fas fa-chart-pie"></i> FINANZAS
+          </button>
+        </div>
+        <div class="p-3">
+          <small class="text-secondary d-block text-center">Conectado: Admin</small>
         </div>
       </nav>
 
-      <div id="content">
-        <div class="top-bar">
-          <button class="btn btn-outline-secondary btn-sm" id="toggle-sidebar"><i class="fas fa-bars"></i></button>
-          <span class="fw-bold text-secondary" id="clock">00:00:00</span>
-        </div>
+      <main class="content-area">
+        
+        <header class="top-header">
+          <button class="btn btn-outline-secondary d-lg-none" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h5 class="m-0 fw-bold text-secondary" id="page-title">PUNTO DE VENTA</h5>
+          <div class="d-flex align-items-center">
+            <span class="badge bg-success me-2" id="status-indicator">ONLINE</span>
+            <span class="fw-bold text-dark" id="clock">12:00</span>
+          </div>
+        </header>
 
-        <div class="container-fluid p-4">
-          
-          <div id="view-venta" class="view-section">
-            <div class="row h-100">
-              <div class="col-md-7">
-                <input type="text" id="search-prod" class="form-control form-control-lg mb-3" placeholder="🔍 Buscar plato..." onkeyup="filtrarProductos()">
-                <div class="row g-3" id="grid-productos">
-                  <div class="text-center mt-5"><i class="fas fa-spinner fa-spin fa-3x text-muted"></i><p>Cargando menú...</p></div>
+        <div class="view-container">
+
+          <div id="view-pos" class="h-100">
+            <div class="pos-grid">
+              
+              <div class="d-flex flex-column h-100 overflow-hidden">
+                <input type="text" class="form-control search-bar mb-3" placeholder="Buscar por código o nombre..." id="search-input" onkeyup="filtrar()">
+                
+                <div class="overflow-auto pe-2" style="flex-grow: 1;">
+                  <div class="row g-3" id="product-grid">
+                    <div class="col-12 text-center py-5 text-muted">
+                      <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                      <p>Cargando catálogo...</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              
-              <div class="col-md-5">
-                <div class="card ticket-panel shadow">
-                  <div class="card-header bg-dark text-white d-flex justify-content-between">
-                    <span><i class="fas fa-receipt"></i> Orden Actual</span>
-                    <button class="btn btn-sm btn-danger" onclick="limpiarCarrito()"><i class="fas fa-trash"></i></button>
+
+              <div class="ticket-panel shadow-sm">
+                <div class="ticket-header">
+                  <span>Orden Actual</span>
+                  <small id="order-id">#PENDIENTE</small>
+                </div>
+                <div class="ticket-body">
+                  <table class="table table-ticket table-hover m-0 w-100">
+                    <thead>
+                      <tr>
+                        <th style="width: 15%">Cant</th>
+                        <th style="width: 50%">Descripción</th>
+                        <th class="text-end">Subt</th>
+                        <th style="width: 10%"></th>
+                      </tr>
+                    </thead>
+                    <tbody id="cart-list">
+                      </tbody>
+                  </table>
+                </div>
+                <div class="ticket-footer">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted">Subtotal</span>
+                    <span class="fw-bold">$0.00</span>
                   </div>
-                  <div class="ticket-list p-0">
-                    <table class="table table-striped table-hover mb-0">
-                      <thead class="table-light sticky-top">
-                        <tr><th>Cant</th><th>Prod</th><th>Total</th><th></th></tr>
-                      </thead>
-                      <tbody id="cart-body">
-                        </tbody>
-                    </table>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="h5 fw-bold text-dark">TOTAL A PAGAR</span>
+                    <span class="h3 fw-bold text-dark" id="total-display">$0.00</span>
                   </div>
-                  <div class="card-footer bg-white p-3">
-                    <div class="d-flex justify-content-between h4 fw-bold">
-                      <span>Total:</span>
-                      <span class="text-success" id="cart-total">$0.00</span>
-                    </div>
-                    <button class="btn btn-success w-100 py-3 fw-bold mt-2" onclick="abrirModalCobro()">
-                      COBRAR <i class="fas fa-arrow-right"></i>
+                  <div class="d-grid gap-2">
+                    <button class="btn btn-primary btn-action" onclick="abrirModalPago()">
+                      <i class="fas fa-credit-card me-2"></i> PROCESAR PAGO
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="cancelarOrden()">
+                      CANCELAR
                     </button>
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
 
-          <div id="view-cocina" class="view-section d-none">
-            <h3 class="border-bottom pb-2 text-secondary">Comandas en Preparación <i class="fas fa-sync fa-spin ms-2 small" style="font-size:0.6em"></i></h3>
-            <div class="row mt-3" id="kitchen-board">
-              <div class="col-12 text-center text-muted">Esperando pedidos...</div>
+          <div id="view-kitchen" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+              <h5 class="text-secondary">COLA DE PREPARACIÓN</h5>
+              <button class="btn btn-sm btn-outline-primary" onclick="refreshCocina()">
+                <i class="fas fa-sync-alt"></i> Actualizar
+              </button>
             </div>
-          </div>
-
-          <div id="view-finanzas" class="view-section d-none">
-             <div class="card shadow p-4" style="max-width: 600px; margin: auto;">
-               <h4 class="text-danger mb-4"><i class="fas fa-wallet"></i> Registrar Egreso (Gasto)</h4>
-               <form id="form-egreso">
-                 <div class="mb-3">
-                   <label>Concepto</label>
-                   <input type="text" id="egreso-desc" class="form-control" placeholder="Ej: Compras de mariscos">
-                 </div>
-                 <div class="mb-3">
-                   <label>Categoría</label>
-                   <select id="egreso-cat" class="form-select">
-                     <option>Insumos / Mercado</option>
-                     <option>Personal</option>
-                     <option>Servicios</option>
-                     <option>Mantenimiento</option>
-                   </select>
-                 </div>
-                 <div class="mb-3">
-                   <label>Monto ($)</label>
-                   <input type="number" step="0.01" id="egreso-monto" class="form-control" placeholder="0.00">
-                 </div>
-                 <button type="button" class="btn btn-danger w-100" onclick="registrarEgreso()">Guardar Gasto</button>
-               </form>
-             </div>
-          </div>
-          
-          <div id="view-admin" class="view-section d-none">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-               <h3>Gestión de Productos</h3>
-               <button class="btn btn-primary" onclick="new bootstrap.Modal('#modalProducto').show()"><i class="fas fa-plus"></i> Nuevo Producto</button>
-            </div>
-            <div class="card">
-               <div class="card-body">
-                 <p class="text-muted">Aquí aparecerá la tabla completa de productos para editar (Próxima actualización).</p>
+            <div id="kitchen-list">
                </div>
-            </div>
+          </div>
+
+          <div id="view-products" class="d-none">
+            <div class="alert alert-info">Módulo de Gestión de Productos en desarrollo.</div>
+          </div>
+          <div id="view-finance" class="d-none">
+            <div class="alert alert-info">Módulo de Finanzas en desarrollo.</div>
           </div>
 
         </div>
-      </div>
+      </main>
     </div>
 
-    <div class="modal fade" id="modalCobro" tabindex="-1">
-      <div class="modal-dialog">
+    <div class="modal fade" id="paymentModal" tabindex="-1" data-bs-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-          <div class="modal-header bg-success text-white">
-            <h5 class="modal-title">Finalizar Venta</h5>
+          <div class="modal-header bg-light">
+            <h5 class="modal-title fw-bold">FINALIZAR TRANSACCIÓN</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
-          <div class="modal-body">
-            <h1 class="text-center fw-bold text-success display-4" id="modal-total-display">$0.00</h1>
-            <hr>
+          <div class="modal-body p-4">
             
             <div class="mb-3">
-              <label class="fw-bold">Identificación (Mesa o Nombre)</label>
-              <input type="text" id="cobro-mesa" class="form-control form-control-lg text-center" placeholder="Ej: Mesa 5 / Sr. Juan">
+              <label class="form-label text-muted small fw-bold text-uppercase">Ubicación / Cliente</label>
+              <input type="text" id="cliente-mesa" class="form-control form-control-lg" placeholder="EJ: MESA 1 / SR. LOPEZ">
             </div>
 
-            <div class="mb-3">
-               <label class="fw-bold mb-2">Método de Pago</label>
-               <div class="row g-2">
-                 <div class="col-4">
-                   <input type="radio" class="btn-check" name="metodoPago" id="mp-efectivo" value="Efectivo" checked>
-                   <label class="btn btn-outline-secondary w-100" for="mp-efectivo"><i class="fas fa-money-bill"></i> Efectivo</label>
-                 </div>
-                 <div class="col-4">
-                   <input type="radio" class="btn-check" name="metodoPago" id="mp-transf" value="Transferencia">
-                   <label class="btn btn-outline-secondary w-100" for="mp-transf"><i class="fas fa-mobile"></i> Transf.</label>
-                 </div>
-                 <div class="col-4">
-                   <input type="radio" class="btn-check" name="metodoPago" id="mp-tarjeta" value="Tarjeta">
-                   <label class="btn btn-outline-secondary w-100" for="mp-tarjeta"><i class="fas fa-credit-card"></i> Tarjeta</label>
-                 </div>
-               </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-lg btn-success w-100 fw-bold" onclick="procesarVentaReal()">✅ CONFIRMAR Y ENVIAR A COCINA</button>
-          </div>
-        </div>
-      </div>
-    </div>
+            <div class="mb-4">
+              <label class="form-label text-muted small fw-bold text-uppercase">Método de Pago</label>
+              <div class="btn-group w-100" role="group">
+                <input type="radio" class="btn-check" name="paymethod" id="pm1" value="Efectivo" checked>
+                <label class="btn btn-outline-secondary" for="pm1">EFECTIVO</label>
 
-    <div class="modal fade" id="modalProducto" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header bg-dark text-white">
-            <h5 class="modal-title">Nuevo Plato</h5>
-          </div>
-          <div class="modal-body">
-             <input type="text" id="np-nombre" class="form-control mb-2" placeholder="Nombre del Plato">
-             <input type="number" id="np-precio" class="form-control mb-2" placeholder="Precio ($)">
-             <select id="np-cat" class="form-select">
-               <option>Plato Fuerte</option>
-               <option>Sopa</option>
-               <option>Bebida</option>
-               <option>Entrada</option>
-             </select>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-primary w-100" onclick="guardarNuevoProducto()">Guardar</button>
+                <input type="radio" class="btn-check" name="paymethod" id="pm2" value="Transferencia">
+                <label class="btn btn-outline-secondary" for="pm2">TRANSF.</label>
+
+                <input type="radio" class="btn-check" name="paymethod" id="pm3" value="Tarjeta">
+                <label class="btn btn-outline-secondary" for="pm3">TARJETA</label>
+              </div>
+            </div>
+
+            <div class="text-center bg-light p-3 rounded mb-3">
+              <span class="text-muted d-block small">Monto Total</span>
+              <span class="display-6 fw-bold text-dark" id="modal-total">$0.00</span>
+            </div>
+            
+            <button class="btn btn-success w-100 btn-action btn-lg" onclick="enviarVenta()">
+              CONFIRMAR E IMPRIMIR
+            </button>
           </div>
         </div>
       </div>
@@ -241,209 +404,217 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      // --- VARIABLES GLOBALES ---
-      let carrito = [];
-      let productosDB = []; // Se llena desde el servidor
-      
+      // --- ESTADO DEL SISTEMA ---
+      let cart = [];
+      let products = [];
+      let refreshInterval;
+
       // --- INICIALIZACIÓN ---
       window.onload = function() {
-        actualizarReloj();
-        setInterval(actualizarReloj, 1000);
-        cargarProductos();      // Traer productos de Sheets
-        iniciarPollingCocina(); // Activar el "tiempo real"
+        startClock();
+        loadData();
+        startPolling(); // Inicia el chequeo silencioso de cocina
       };
 
-      function nav(vista) {
-        document.querySelectorAll('.view-section').forEach(el => el.classList.add('d-none'));
-        document.getElementById('view-' + vista).classList.remove('d-none');
+      function startClock() {
+        setInterval(() => {
+          const now = new Date();
+          document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }, 1000);
+      }
+
+      function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+      }
+
+      function switchView(viewName) {
+        // Ocultar todas las vistas
+        ['pos', 'kitchen', 'products', 'finance'].forEach(v => {
+          document.getElementById('view-' + v).classList.add('d-none');
+        });
+        // Mostrar la deseada
+        document.getElementById('view-' + viewName).classList.remove('d-none');
         
-        document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
+        // Actualizar título
+        const titles = {
+          'pos': 'PUNTO DE VENTA',
+          'kitchen': 'MONITOR DE COCINA',
+          'products': 'INVENTARIO',
+          'finance': 'FINANZAS'
+        };
+        document.getElementById('page-title').innerText = titles[viewName];
+        
+        // Actualizar botones menú
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         event.currentTarget.classList.add('active');
+        
+        // Cerrar sidebar en móvil
+        document.getElementById('sidebar').classList.remove('active');
       }
 
-      function actualizarReloj() {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+      // --- CARGA DE DATOS (Backend Connection) ---
+      function loadData() {
+        google.script.run.withSuccessHandler(renderGrid).getProductos();
       }
 
-      // --- LOGICA DEL POS (CAJA) ---
-      function cargarProductos() {
-        google.script.run.withSuccessHandler((res) => {
-          productosDB = res;
-          renderProductos(productosDB);
-        }).getProductos();
-      }
-
-      function renderProductos(lista) {
-        const grid = document.getElementById('grid-productos');
-        grid.innerHTML = "";
-        lista.forEach(p => {
+      function renderGrid(data) {
+        products = data;
+        const grid = document.getElementById('product-grid');
+        grid.innerHTML = '';
+        
+        products.forEach(p => {
           grid.innerHTML += `
-            <div class="col-6 col-lg-3 col-md-4">
-              <div class="card product-card p-3 text-center" onclick="addToCart('${p.id}', '${p.nombre}', ${p.precio})">
-                <span class="price-badge">$${p.precio.toFixed(2)}</span>
-                <div class="display-4 text-primary mb-2"><i class="fas fa-utensils"></i></div>
-                <h6 class="fw-bold mb-0">${p.nombre}</h6>
-                <small class="text-muted">${p.categoria}</small>
+            <div class="col-6 col-md-4 col-lg-3">
+              <div class="product-card" onclick="addToCart('${p.id}')">
+                <div class="card-img-box">
+                  <i class="fas fa-utensils"></i>
+                </div>
+                <div class="card-info">
+                  <div class="card-title text-truncate">${p.nombre}</div>
+                  <div class="card-price">$${p.precio.toFixed(2)}</div>
+                </div>
               </div>
-            </div>`;
+            </div>
+          `;
         });
       }
 
-      function filtrarProductos() {
-        const term = document.getElementById('search-prod').value.toLowerCase();
-        const filtrados = productosDB.filter(p => p.nombre.toLowerCase().includes(term));
-        renderProductos(filtrados);
+      function filtrar() {
+        const term = document.getElementById('search-input').value.toLowerCase();
+        const items = document.querySelectorAll('#product-grid .col-6');
+        items.forEach(item => {
+          const text = item.innerText.toLowerCase();
+          item.style.display = text.includes(term) ? 'block' : 'none';
+        });
       }
 
-      function addToCart(id, nombre, precio) {
-        const existente = carrito.find(item => item.id === id);
-        if(existente) {
-          existente.cantidad++;
-        } else {
-          carrito.push({ id, nombre, precio, cantidad: 1 });
-        }
-        renderCart();
-      }
-
-      function renderCart() {
-        const tbody = document.getElementById('cart-body');
-        tbody.innerHTML = "";
-        let total = 0;
+      // --- LOGICA CARRITO ---
+      function addToCart(id) {
+        const prod = products.find(p => p.id === id);
+        const exists = cart.find(c => c.id === id);
         
-        carrito.forEach((item, index) => {
-          const subtotal = item.precio * item.cantidad;
-          total += subtotal;
+        if (exists) {
+          exists.qty++;
+        } else {
+          cart.push({ ...prod, qty: 1 });
+        }
+        updateCartUI();
+      }
+
+      function updateCartUI() {
+        const tbody = document.getElementById('cart-list');
+        tbody.innerHTML = '';
+        let total = 0;
+
+        cart.forEach((item, idx) => {
+          const sub = item.qty * item.precio;
+          total += sub;
           tbody.innerHTML += `
             <tr>
-              <td><input type="number" min="1" value="${item.cantidad}" style="width:50px" onchange="updateCant(${index}, this.value)"></td>
+              <td><input type="number" class="form-control form-control-sm text-center p-0" value="${item.qty}" onchange="changeQty(${idx}, this.value)"></td>
               <td>${item.nombre}</td>
-              <td>$${subtotal.toFixed(2)}</td>
-              <td><i class="fas fa-times text-danger" style="cursor:pointer" onclick="removeFromCart(${index})"></i></td>
-            </tr>`;
+              <td class="text-end">$${sub.toFixed(2)}</td>
+              <td class="text-end"><i class="fas fa-trash text-danger" style="cursor:pointer" onclick="removeItem(${idx})"></i></td>
+            </tr>
+          `;
         });
-        
-        document.getElementById('cart-total').innerText = "$" + total.toFixed(2);
-        document.getElementById('modal-total-display').innerText = "$" + total.toFixed(2);
+
+        document.getElementById('total-display').innerText = `$${total.toFixed(2)}`;
+        document.getElementById('modal-total').innerText = `$${total.toFixed(2)}`;
       }
 
-      function updateCant(index, val) {
-        if(val < 1) return;
-        carrito[index].cantidad = parseInt(val);
-        renderCart();
+      function changeQty(idx, val) {
+        if (val < 1) return;
+        cart[idx].qty = parseInt(val);
+        updateCartUI();
       }
 
-      function removeFromCart(index) {
-        carrito.splice(index, 1);
-        renderCart();
-      }
-      
-      function limpiarCarrito() {
-        carrito = [];
-        renderCart();
+      function removeItem(idx) {
+        cart.splice(idx, 1);
+        updateCartUI();
       }
 
-      // --- LOGICA DE COBRO ---
-      function abrirModalCobro() {
-        if(carrito.length === 0) return alert("Carrito vacío");
-        const modal = new bootstrap.Modal(document.getElementById('modalCobro'));
-        modal.show();
+      function cancelarOrden() {
+        if(confirm('¿Borrar orden actual?')) {
+          cart = [];
+          updateCartUI();
+        }
       }
 
-      function procesarVentaReal() {
-        const mesa = document.getElementById('cobro-mesa').value;
-        if(!mesa) return alert("Por favor indica la Mesa o Cliente");
-        
-        const metodo = document.querySelector('input[name="metodoPago"]:checked').value;
-        const total = parseFloat(document.getElementById('cart-total').innerText.replace('$',''));
-        
-        const venta = {
-          mesa: mesa,
+      // --- TRANSACCION ---
+      function abrirModalPago() {
+        if (cart.length === 0) return alert('El carrito está vacío.');
+        new bootstrap.Modal(document.getElementById('paymentModal')).show();
+      }
+
+      function enviarVenta() {
+        const mesa = document.getElementById('cliente-mesa').value;
+        if (!mesa) return alert('Debe ingresar Mesa o Cliente');
+
+        const metodo = document.querySelector('input[name="paymethod"]:checked').value;
+        const total = parseFloat(document.getElementById('modal-total').innerText.replace('$',''));
+
+        const pedido = {
+          cliente: mesa,
           metodo: metodo,
           total: total,
-          items: carrito
+          items: cart
         };
-        
-        // Bloquear botón
-        document.querySelector('#modalCobro .btn-success').disabled = true;
-        document.querySelector('#modalCobro .btn-success').innerText = "Procesando...";
 
-        google.script.run.withSuccessHandler((res) => {
-          alert("✅ " + res);
-          location.reload(); // Recargar para limpiar todo
-        }).registrarVentaCompleta(venta);
+        // UI Loading
+        const btn = document.querySelector('#paymentModal .btn-success');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> PROCESANDO...';
+
+        google.script.run.withSuccessHandler(res => {
+          alert('VENTA REGISTRADA CORRECTAMENTE');
+          location.reload();
+        }).registrarVentaCompleta(pedido);
       }
 
-      // --- LOGICA DE COCINA (TIEMPO REAL) ---
-      function iniciarPollingCocina() {
+      // --- COCINA (Real Time Polling) ---
+      function startPolling() {
         setInterval(() => {
-          // Solo si estamos viendo la cocina
-          if(!document.getElementById('view-cocina').classList.contains('d-none')){
-             google.script.run.withSuccessHandler(renderCocina).getPedidosCocina();
+          const view = document.getElementById('view-kitchen');
+          if (!view.classList.contains('d-none')) {
+            refreshCocina();
           }
         }, 5000); // 5 segundos
       }
 
+      function refreshCocina() {
+        google.script.run.withSuccessHandler(renderCocina).getPedidosCocina();
+      }
+
       function renderCocina(pedidos) {
-        const board = document.getElementById('kitchen-board');
-        if(pedidos.length === 0) {
-          board.innerHTML = '<div class="col-12 text-center text-muted mt-5"><h4>Todo Despachado ✅</h4></div>';
+        const container = document.getElementById('kitchen-list');
+        if (pedidos.length === 0) {
+          container.innerHTML = '<div class="alert alert-success text-center">Todo despachado. Cocina al día.</div>';
           return;
         }
 
-        // Generar HTML
-        let html = "";
+        let html = '';
         pedidos.forEach(p => {
-           html += `
-             <div class="col-md-4 col-sm-6">
-               <div class="card shadow-sm kitchen-card p-3">
-                 <div class="kitchen-header">
-                   <span class="text-primary"><i class="fas fa-map-marker-alt"></i> ${p.mesa}</span>
-                   <small>${p.hora}</small>
-                 </div>
-                 <h4 class="fw-bold">${p.cantidad}x ${p.producto}</h4>
-                 <div class="mt-3">
-                   <button class="btn btn-success w-100" onclick="despacharItem('${p.id_detalle}')">MARCAR LISTO</button>
-                 </div>
-               </div>
-             </div>`;
+          html += `
+            <div class="kitchen-row shadow-sm">
+              <div>
+                <h5 class="fw-bold mb-1">${p.cantidad} x ${p.producto}</h5>
+                <span class="badge bg-secondary text-uppercase">${p.mesa}</span>
+                <small class="text-muted ms-2"><i class="far fa-clock"></i> ${p.hora}</small>
+              </div>
+              <button class="btn btn-success btn-sm px-4" onclick="despachar('${p.id_detalle}')">
+                LISTO
+              </button>
+            </div>
+          `;
         });
         
-        // Solo actualizar si hay cambios (para no molestar la vista)
-        if(board.innerHTML !== html) board.innerHTML = html;
+        // Evita parpadeo si es idéntico (Simple diff check)
+        if (container.innerHTML !== html) container.innerHTML = html;
       }
 
-      function despacharItem(id) {
-        google.script.run.withSuccessHandler(() => {
-          // Forzar actualización inmediata
-          google.script.run.withSuccessHandler(renderCocina).getPedidosCocina();
-        }).marcarDespachado(id);
-      }
-
-      // --- LOGICA ADMIN (NUEVO PRODUCTO) ---
-      function guardarNuevoProducto() {
-        const data = {
-          nombre: document.getElementById('np-nombre').value,
-          precio: document.getElementById('np-precio').value,
-          categoria: document.getElementById('np-cat').value
-        };
-        
-        google.script.run.withSuccessHandler(() => {
-          alert("Producto creado");
-          location.reload();
-        }).guardarNuevoProducto(data);
-      }
-
-      // --- LOGICA FINANZAS ---
-      function registrarEgreso() {
-        const data = {
-           desc: document.getElementById('egreso-desc').value,
-           cat: document.getElementById('egreso-cat').value,
-           monto: document.getElementById('egreso-monto').value
-        };
-        google.script.run.withSuccessHandler(() => {
-          alert("Gasto registrado");
-          document.getElementById('form-egreso').reset();
-        }).registrarEgreso(data);
+      function despachar(id) {
+        google.script.run.withSuccessHandler(refreshCocina).marcarDespachado(id);
       }
 
     </script>
