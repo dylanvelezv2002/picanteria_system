@@ -12,391 +12,144 @@
     
     <style>
       :root {
-        /* PALETA CORPORATIVA PUERTO GUARANDA */
-        --brand-dark: #0f172a;   /* Azul Noche (Sidebar) */
-        --brand-primary: #334155; /* Gris Azulado (Headers) */
-        --brand-accent: #0284c7;  /* Azul Acción (Botones) */
-        --brand-danger: #ef4444;
-        --brand-success: #10b981;
-        --bg-main: #f1f5f9;       /* Fondo Gris muy claro */
+        --brand-dark: #0f172a;
+        --brand-primary: #334155;
+        --brand-accent: #0284c7;
+        --bg-main: #f1f5f9;
         --border-color: #e2e8f0;
       }
 
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: var(--bg-main);
-        color: #334155;
-        overflow: hidden; /* App feel */
-        height: 100vh;
-      }
+      body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); overflow: hidden; height: 100vh; }
 
-      /* --- LAYOUT ESTRUCTURAL --- */
-      #main-wrapper {
-        display: flex;
-        width: 100%;
-        height: 100%;
-      }
-
-      /* SIDEBAR NAVEGACIÓN */
-      .sidebar {
-        width: 280px;
+      /* --- LOGIN OVERLAY --- */
+      #login-screen {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background-color: var(--brand-dark);
-        color: white;
-        display: flex;
-        flex-direction: column;
-        flex-shrink: 0;
-        transition: all 0.3s ease;
-      }
-
-      .brand-header {
-        padding: 25px;
-        background-color: rgba(255,255,255,0.05);
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-      }
-      .brand-header h4 {
-        margin: 0;
-        font-weight: 700;
-        letter-spacing: 1px;
-        font-size: 1.1rem;
-        text-transform: uppercase;
-      }
-      .brand-header small {
-        color: #94a3b8;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-      }
-
-      .nav-menu {
-        padding: 20px 0;
-        flex-grow: 1;
-      }
-
-      .nav-btn {
-        width: 100%;
-        text-align: left;
-        background: transparent;
-        border: none;
-        color: #cbd5e1;
-        padding: 15px 25px;
-        font-weight: 500;
-        font-size: 0.95rem;
-        transition: 0.2s;
-        border-left: 4px solid transparent;
-      }
-
-      .nav-btn:hover {
-        background-color: rgba(255,255,255,0.05);
+        z-index: 9999;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
         color: white;
       }
-
-      .nav-btn.active {
-        background-color: rgba(255,255,255,0.1);
-        color: white;
-        border-left-color: var(--brand-accent);
+      .user-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 20px; width: 100%; max-width: 600px; padding: 20px; }
+      .user-card {
+        background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: 0.3s;
       }
+      .user-card:hover { background: var(--brand-accent); transform: translateY(-5px); }
+      .user-avatar { font-size: 2.5rem; margin-bottom: 10px; }
 
-      .nav-btn i { width: 25px; text-align: center; margin-right: 10px; }
-
-      /* AREA DE CONTENIDO */
-      .content-area {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        position: relative;
-      }
-
-      .top-header {
-        background: white;
-        height: 60px;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 25px;
-      }
-
-      .view-container {
-        padding: 20px;
-        overflow-y: auto;
-        height: calc(100% - 60px);
-      }
-
-      /* --- MODULO POS (VENTAS) --- */
-      .pos-grid {
-        display: grid;
-        grid-template-columns: 1fr 380px; /* Panel izquierdo fluido, Ticket fijo */
-        gap: 20px;
-        height: 100%;
-      }
-
-      .search-bar {
-        border-radius: 4px;
-        border: 1px solid var(--border-color);
-        padding: 12px;
-        font-size: 1rem;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-      }
-
-      /* Tarjetas de Producto - Estilo Minimalista */
-      .product-card {
-        background: white;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        padding: 0;
-        cursor: pointer;
-        transition: transform 0.15s, box-shadow 0.15s;
-        height: 100%;
-        overflow: hidden;
-      }
-      .product-card:hover {
-        border-color: var(--brand-accent);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        transform: translateY(-2px);
-      }
+      /* --- MAIN LAYOUT (Oculto al inicio) --- */
+      #main-wrapper { display: flex; width: 100%; height: 100%; opacity: 0; transition: opacity 1s; }
       
-      .card-img-box {
-        height: 100px;
-        background-color: #f8fafc;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #94a3b8;
-        font-size: 2rem;
-      }
+      /* Reutilizamos estilos previos del sidebar y pos */
+      .sidebar { width: 280px; background-color: var(--brand-dark); color: white; display: flex; flex-direction: column; }
+      .brand-header { padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+      .nav-menu { padding: 20px 0; flex-grow: 1; }
+      .nav-btn { width: 100%; text-align: left; background: transparent; border: none; color: #cbd5e1; padding: 15px 25px; transition: 0.2s; }
+      .nav-btn:hover, .nav-btn.active { background: rgba(255,255,255,0.1); color: white; border-left: 4px solid var(--brand-accent); }
+      .content-area { flex-grow: 1; display: flex; flex-direction: column; }
+      .top-header { background: white; height: 60px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 25px; }
       
-      .card-info { padding: 12px; }
-      .card-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; color: var(--brand-dark); }
-      .card-price { font-size: 0.95rem; font-weight: 700; color: var(--brand-accent); }
+      .pos-grid { display: grid; grid-template-columns: 1fr 380px; gap: 20px; height: 100%; padding: 20px; overflow: hidden; }
+      .product-card { background: white; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; height: 100%; transition: 0.2s; overflow: hidden; }
+      .product-card:hover { border-color: var(--brand-accent); transform: translateY(-3px); }
+      .card-img-box { height: 100px; background: #f8fafc; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #94a3b8; }
+      .ticket-panel { background: white; border: 1px solid var(--border-color); display: flex; flex-direction: column; height: 100%; border-radius: 6px; }
+      .kitchen-row { background: white; border: 1px solid var(--border-color); margin-bottom: 10px; padding: 15px; border-left: 5px solid #eab308; display: flex; justify-content: space-between; align-items: center; }
 
-      /* TICKET DE VENTA (Recibo) */
-      .ticket-panel {
-        background: white;
-        border: 1px solid var(--border-color);
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        border-radius: 6px;
-      }
-      
-      .ticket-header {
-        background-color: var(--brand-primary);
-        color: white;
-        padding: 15px;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.9rem;
-        display: flex; justify-content: space-between; align-items: center;
-      }
-
-      .ticket-body { flex-grow: 1; overflow-y: auto; padding: 0; }
-      
-      .table-ticket th {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        color: #64748b;
-        background: #f8fafc;
-        padding: 10px;
-        border-bottom: 2px solid var(--border-color);
-      }
-      .table-ticket td { vertical-align: middle; padding: 10px; font-size: 0.9rem; }
-
-      .ticket-footer {
-        border-top: 2px solid var(--border-color);
-        padding: 20px;
-        background-color: #f8fafc;
-      }
-      
-      .btn-action {
-        text-transform: uppercase;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        padding: 12px;
-        border-radius: 4px;
-      }
-
-      /* --- COCINA MONITOR (Kanban List) --- */
-      .kitchen-row {
-        background: white;
-        border: 1px solid var(--border-color);
-        margin-bottom: 10px;
-        border-radius: 4px;
-        padding: 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-left: 5px solid #eab308; /* Pendiente */
-      }
-      .kitchen-row.done { border-left-color: var(--brand-success); opacity: 0.6; }
-
-      /* RESPONSIVE TABLET/MOBILE */
       @media (max-width: 992px) {
         .pos-grid { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
-        .sidebar { position: absolute; height: 100%; z-index: 1000; transform: translateX(-100%); }
+        .sidebar { position: fixed; height: 100%; z-index: 1000; transform: translateX(-100%); transition: 0.3s; }
         .sidebar.active { transform: translateX(0); }
-        .ticket-panel { height: 50vh; }
       }
+      .d-none { display: none !important; }
     </style>
   </head>
   <body>
 
-    <div id="main-wrapper">
-      
+    <div id="login-screen">
+      <div class="text-center mb-5">
+        <h1 class="fw-bold tracking-widest">PUERTO GUARANDA</h1>
+        <p class="text-secondary">SISTEMA DE GESTIÓN</p>
+      </div>
+      <h5 class="mb-4">¿QUIÉN ESTÁ ATENDIENDO HOY?</h5>
+      <div class="user-grid" id="user-list">
+        <div class="spinner-border text-light" role="status"></div>
+      </div>
+    </div>
+
+    <div id="main-wrapper" class="d-none">
       <nav class="sidebar" id="sidebar">
         <div class="brand-header">
-          <h4>PUERTO GUARANDA</h4>
-          <small>Sistema de Gestión v2.1</small>
+          <h4 class="m-0 fw-bold">PUERTO GUARANDA</h4>
         </div>
         <div class="nav-menu">
-          <button class="nav-btn active" onclick="switchView('pos')">
-            <i class="fas fa-cash-register"></i> PUNTO DE VENTA
-          </button>
-          <button class="nav-btn" onclick="switchView('kitchen')">
-            <i class="fas fa-tasks"></i> MONITOR COCINA
-          </button>
-          <button class="nav-btn" onclick="switchView('products')">
-            <i class="fas fa-box-open"></i> INVENTARIO
-          </button>
-          <button class="nav-btn" onclick="switchView('finance')">
-            <i class="fas fa-chart-pie"></i> FINANZAS
-          </button>
+          <button class="nav-btn active" onclick="switchView('pos')"><i class="fas fa-cash-register me-2"></i> PUNTO DE VENTA</button>
+          <button class="nav-btn" onclick="switchView('kitchen')"><i class="fas fa-tasks me-2"></i> MONITOR COCINA</button>
         </div>
-        <div class="p-3">
-          <small class="text-secondary d-block text-center">Conectado: Admin</small>
+        <div class="p-3 border-top border-secondary">
+          <small class="text-secondary d-block">USUARIO ACTUAL:</small>
+          <strong class="text-white" id="sidebar-user-name">...</strong>
+          <button class="btn btn-outline-secondary btn-sm w-100 mt-2" onclick="location.reload()">SALIR</button>
         </div>
       </nav>
 
       <main class="content-area">
-        
         <header class="top-header">
-          <button class="btn btn-outline-secondary d-lg-none" onclick="toggleSidebar()">
-            <i class="fas fa-bars"></i>
-          </button>
+          <button class="btn btn-outline-secondary d-lg-none" onclick="document.getElementById('sidebar').classList.toggle('active')"><i class="fas fa-bars"></i></button>
           <h5 class="m-0 fw-bold text-secondary" id="page-title">PUNTO DE VENTA</h5>
-          <div class="d-flex align-items-center">
-            <span class="badge bg-success me-2" id="status-indicator">ONLINE</span>
-            <span class="fw-bold text-dark" id="clock">12:00</span>
+          <div>
+            <span class="badge bg-success me-2">ONLINE</span>
+            <span class="fw-bold" id="clock">00:00</span>
           </div>
         </header>
 
-        <div class="view-container">
-
-          <div id="view-pos" class="h-100">
-            <div class="pos-grid">
-              
-              <div class="d-flex flex-column h-100 overflow-hidden">
-                <input type="text" class="form-control search-bar mb-3" placeholder="Buscar por código o nombre..." id="search-input" onkeyup="filtrar()">
-                
-                <div class="overflow-auto pe-2" style="flex-grow: 1;">
-                  <div class="row g-3" id="product-grid">
-                    <div class="col-12 text-center py-5 text-muted">
-                      <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
-                      <p>Cargando catálogo...</p>
-                    </div>
-                  </div>
-                </div>
+        <div id="view-pos" class="h-100 view-section">
+          <div class="pos-grid">
+            <div class="d-flex flex-column h-100">
+              <input type="text" id="search-input" class="form-control mb-3" placeholder="🔍 Buscar plato..." onkeyup="filtrar()">
+              <div class="overflow-auto pe-2" style="flex-grow: 1;">
+                <div class="row g-3" id="product-grid"></div>
               </div>
-
-              <div class="ticket-panel shadow-sm">
-                <div class="ticket-header">
-                  <span>Orden Actual</span>
-                  <small id="order-id">#PENDIENTE</small>
-                </div>
-                <div class="ticket-body">
-                  <table class="table table-ticket table-hover m-0 w-100">
-                    <thead>
-                      <tr>
-                        <th style="width: 15%">Cant</th>
-                        <th style="width: 50%">Descripción</th>
-                        <th class="text-end">Subt</th>
-                        <th style="width: 10%"></th>
-                      </tr>
-                    </thead>
-                    <tbody id="cart-list">
-                      </tbody>
-                  </table>
-                </div>
-                <div class="ticket-footer">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-muted">Subtotal</span>
-                    <span class="fw-bold">$0.00</span>
-                  </div>
-                  <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="h5 fw-bold text-dark">TOTAL A PAGAR</span>
-                    <span class="h3 fw-bold text-dark" id="total-display">$0.00</span>
-                  </div>
-                  <div class="d-grid gap-2">
-                    <button class="btn btn-primary btn-action" onclick="abrirModalPago()">
-                      <i class="fas fa-credit-card me-2"></i> PROCESAR PAGO
-                    </button>
-                    <button class="btn btn-outline-danger btn-sm" onclick="cancelarOrden()">
-                      CANCELAR
-                    </button>
-                  </div>
-                </div>
+            </div>
+            
+            <div class="ticket-panel shadow-sm">
+              <div class="bg-dark text-white p-3 d-flex justify-content-between">
+                <span>ORDEN ACTUAL</span>
+                <button class="btn btn-sm btn-danger" onclick="cart=[]; updateCartUI();"><i class="fas fa-trash"></i></button>
               </div>
-
+              <div class="flex-grow-1 overflow-auto p-0">
+                <table class="table table-hover mb-0 w-100">
+                  <tbody id="cart-list"></tbody>
+                </table>
+              </div>
+              <div class="p-3 bg-light border-top">
+                <div class="d-flex justify-content-between h4 fw-bold mb-3">
+                  <span>TOTAL:</span><span id="total-display">$0.00</span>
+                </div>
+                <button class="btn btn-primary w-100 py-3 fw-bold" onclick="abrirModalPago()">PROCESAR PAGO</button>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div id="view-kitchen" class="d-none">
-            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-              <h5 class="text-secondary">COLA DE PREPARACIÓN</h5>
-              <button class="btn btn-sm btn-outline-primary" onclick="refreshCocina()">
-                <i class="fas fa-sync-alt"></i> Actualizar
-              </button>
-            </div>
-            <div id="kitchen-list">
-               </div>
-          </div>
-
-          <div id="view-products" class="d-none">
-            <div class="alert alert-info">Módulo de Gestión de Productos en desarrollo.</div>
-          </div>
-          <div id="view-finance" class="d-none">
-            <div class="alert alert-info">Módulo de Finanzas en desarrollo.</div>
-          </div>
-
+        <div id="view-kitchen" class="d-none view-section p-4 overflow-auto h-100">
+          <h4 class="mb-4 text-secondary">PEDIDOS PENDIENTES</h4>
+          <div id="kitchen-list"></div>
         </div>
       </main>
     </div>
 
-    <div class="modal fade" id="paymentModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal fade" id="paymentModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-          <div class="modal-header bg-light">
-            <h5 class="modal-title fw-bold">FINALIZAR TRANSACCIÓN</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
+          <div class="modal-header bg-light"><h5 class="modal-title fw-bold">FINALIZAR</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
           <div class="modal-body p-4">
-            
-            <div class="mb-3">
-              <label class="form-label text-muted small fw-bold text-uppercase">Ubicación / Cliente</label>
-              <input type="text" id="cliente-mesa" class="form-control form-control-lg" placeholder="EJ: MESA 1 / SR. LOPEZ">
-            </div>
-
+            <div class="mb-3"><label class="fw-bold small">MESA / CLIENTE</label><input type="text" id="cliente-mesa" class="form-control form-control-lg text-uppercase" placeholder="EJ: MESA 4"></div>
             <div class="mb-4">
-              <label class="form-label text-muted small fw-bold text-uppercase">Método de Pago</label>
-              <div class="btn-group w-100" role="group">
-                <input type="radio" class="btn-check" name="paymethod" id="pm1" value="Efectivo" checked>
-                <label class="btn btn-outline-secondary" for="pm1">EFECTIVO</label>
-
-                <input type="radio" class="btn-check" name="paymethod" id="pm2" value="Transferencia">
-                <label class="btn btn-outline-secondary" for="pm2">TRANSF.</label>
-
-                <input type="radio" class="btn-check" name="paymethod" id="pm3" value="Tarjeta">
-                <label class="btn btn-outline-secondary" for="pm3">TARJETA</label>
-              </div>
+              <label class="fw-bold small">MÉTODO PAGO</label>
+              <div class="btn-group w-100"><input type="radio" class="btn-check" name="pay" id="p1" value="Efectivo" checked><label class="btn btn-outline-dark" for="p1">EFECTIVO</label><input type="radio" class="btn-check" name="pay" id="p2" value="Transferencia"><label class="btn btn-outline-dark" for="p2">TRANSF.</label></div>
             </div>
-
-            <div class="text-center bg-light p-3 rounded mb-3">
-              <span class="text-muted d-block small">Monto Total</span>
-              <span class="display-6 fw-bold text-dark" id="modal-total">$0.00</span>
-            </div>
-            
-            <button class="btn btn-success w-100 btn-action btn-lg" onclick="enviarVenta()">
-              CONFIRMAR E IMPRIMIR
-            </button>
+            <button class="btn btn-success w-100 btn-lg fw-bold" onclick="enviarVenta()">CONFIRMAR ($<span id="modal-total-amt">0.00</span>)</button>
           </div>
         </div>
       </div>
@@ -404,219 +157,167 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      // --- ESTADO DEL SISTEMA ---
+      let currentUser = ""; // VARIABLE GLOBAL DEL VENDEDOR
       let cart = [];
       let products = [];
-      let refreshInterval;
 
-      // --- INICIALIZACIÓN ---
       window.onload = function() {
-        startClock();
-        loadData();
-        startPolling(); // Inicia el chequeo silencioso de cocina
+        setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}), 1000);
+        cargarUsuarios(); // Primero cargamos usuarios para el Login
       };
 
-      function startClock() {
-        setInterval(() => {
-          const now = new Date();
-          document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        }, 1000);
+      // --- LOGIN LOGIC ---
+      function cargarUsuarios() {
+        google.script.run.withSuccessHandler(users => {
+          const container = document.getElementById('user-list');
+          container.innerHTML = "";
+          if(users.length === 0) container.innerHTML = "<p>No hay usuarios en la hoja 'Usuarios'</p>";
+          
+          users.forEach(u => {
+            container.innerHTML += `
+              <div class="user-card" onclick="iniciarSesion('${u.nombre}')">
+                <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                <div class="fw-bold">${u.nombre}</div>
+                <small class="text-white-50">${u.rol}</small>
+              </div>`;
+          });
+        }).getUsuarios();
       }
 
-      function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
+      function iniciarSesion(nombre) {
+        currentUser = nombre;
+        document.getElementById('sidebar-user-name').innerText = currentUser;
+        
+        // Animación de entrada
+        document.getElementById('login-screen').style.opacity = 0;
+        setTimeout(() => {
+          document.getElementById('login-screen').classList.add('d-none');
+          document.getElementById('main-wrapper').classList.remove('d-none');
+          setTimeout(() => document.getElementById('main-wrapper').style.opacity = 1, 100);
+        }, 500);
+
+        // Cargar datos del sistema
+        loadSystemData();
+        startKitchenPolling();
       }
 
-      function switchView(viewName) {
-        // Ocultar todas las vistas
-        ['pos', 'kitchen', 'products', 'finance'].forEach(v => {
-          document.getElementById('view-' + v).classList.add('d-none');
-        });
-        // Mostrar la deseada
-        document.getElementById('view-' + viewName).classList.remove('d-none');
-        
-        // Actualizar título
-        const titles = {
-          'pos': 'PUNTO DE VENTA',
-          'kitchen': 'MONITOR DE COCINA',
-          'products': 'INVENTARIO',
-          'finance': 'FINANZAS'
-        };
-        document.getElementById('page-title').innerText = titles[viewName];
-        
-        // Actualizar botones menú
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-        
-        // Cerrar sidebar en móvil
-        document.getElementById('sidebar').classList.remove('active');
-      }
-
-      // --- CARGA DE DATOS (Backend Connection) ---
-      function loadData() {
-        google.script.run.withSuccessHandler(renderGrid).getProductos();
+      // --- SYSTEM LOGIC ---
+      function loadSystemData() {
+        google.script.run.withSuccessHandler(data => {
+          products = data;
+          renderGrid(products);
+        }).getProductos();
       }
 
       function renderGrid(data) {
-        products = data;
         const grid = document.getElementById('product-grid');
-        grid.innerHTML = '';
-        
-        products.forEach(p => {
+        grid.innerHTML = "";
+        data.forEach(p => {
           grid.innerHTML += `
             <div class="col-6 col-md-4 col-lg-3">
-              <div class="product-card" onclick="addToCart('${p.id}')">
-                <div class="card-img-box">
-                  <i class="fas fa-utensils"></i>
-                </div>
-                <div class="card-info">
-                  <div class="card-title text-truncate">${p.nombre}</div>
-                  <div class="card-price">$${p.precio.toFixed(2)}</div>
+              <div class="product-card p-2" onclick="addToCart('${p.id}')">
+                <div class="card-img-box mb-2"><i class="fas fa-utensils"></i></div>
+                <div class="px-2">
+                  <div class="fw-bold text-truncate">${p.nombre}</div>
+                  <div class="text-primary fw-bold">$${p.precio.toFixed(2)}</div>
                 </div>
               </div>
-            </div>
-          `;
+            </div>`;
         });
       }
 
-      function filtrar() {
-        const term = document.getElementById('search-input').value.toLowerCase();
-        const items = document.querySelectorAll('#product-grid .col-6');
-        items.forEach(item => {
-          const text = item.innerText.toLowerCase();
-          item.style.display = text.includes(term) ? 'block' : 'none';
-        });
-      }
-
-      // --- LOGICA CARRITO ---
       function addToCart(id) {
-        const prod = products.find(p => p.id === id);
-        const exists = cart.find(c => c.id === id);
-        
-        if (exists) {
-          exists.qty++;
-        } else {
-          cart.push({ ...prod, qty: 1 });
-        }
+        const p = products.find(x => x.id === id);
+        const item = cart.find(c => c.id === id);
+        if(item) item.qty++; else cart.push({...p, qty:1});
         updateCartUI();
       }
 
       function updateCartUI() {
-        const tbody = document.getElementById('cart-list');
-        tbody.innerHTML = '';
+        const list = document.getElementById('cart-list');
+        list.innerHTML = "";
         let total = 0;
-
-        cart.forEach((item, idx) => {
-          const sub = item.qty * item.precio;
-          total += sub;
-          tbody.innerHTML += `
+        cart.forEach((c, i) => {
+          total += c.precio * c.qty;
+          list.innerHTML += `
             <tr>
-              <td><input type="number" class="form-control form-control-sm text-center p-0" value="${item.qty}" onchange="changeQty(${idx}, this.value)"></td>
-              <td>${item.nombre}</td>
-              <td class="text-end">$${sub.toFixed(2)}</td>
-              <td class="text-end"><i class="fas fa-trash text-danger" style="cursor:pointer" onclick="removeItem(${idx})"></i></td>
-            </tr>
-          `;
+              <td><input type="number" class="form-control form-control-sm text-center" style="width:50px" value="${c.qty}" onchange="cart[${i}].qty=parseInt(this.value); updateCartUI()"></td>
+              <td><small>${c.nombre}</small></td>
+              <td class="text-end">$${(c.precio*c.qty).toFixed(2)}</td>
+            </tr>`;
         });
-
         document.getElementById('total-display').innerText = `$${total.toFixed(2)}`;
-        document.getElementById('modal-total').innerText = `$${total.toFixed(2)}`;
+        document.getElementById('modal-total-amt').innerText = total.toFixed(2);
       }
 
-      function changeQty(idx, val) {
-        if (val < 1) return;
-        cart[idx].qty = parseInt(val);
-        updateCartUI();
+      function filtrar() {
+        const term = document.getElementById('search-input').value.toLowerCase();
+        const filtrados = products.filter(p => p.nombre.toLowerCase().includes(term));
+        renderGrid(filtrados);
       }
 
-      function removeItem(idx) {
-        cart.splice(idx, 1);
-        updateCartUI();
+      // --- NAVEGACION ---
+      function switchView(view) {
+        document.querySelectorAll('.view-section').forEach(v => v.classList.add('d-none'));
+        document.getElementById('view-'+view).classList.remove('d-none');
+        document.getElementById('page-title').innerText = view === 'pos' ? 'PUNTO DE VENTA' : 'MONITOR COCINA';
       }
 
-      function cancelarOrden() {
-        if(confirm('¿Borrar orden actual?')) {
-          cart = [];
-          updateCartUI();
-        }
-      }
-
-      // --- TRANSACCION ---
+      // --- VENTA ---
       function abrirModalPago() {
-        if (cart.length === 0) return alert('El carrito está vacío.');
+        if(cart.length === 0) return alert("Carrito vacío");
         new bootstrap.Modal(document.getElementById('paymentModal')).show();
       }
 
       function enviarVenta() {
         const mesa = document.getElementById('cliente-mesa').value;
-        if (!mesa) return alert('Debe ingresar Mesa o Cliente');
-
-        const metodo = document.querySelector('input[name="paymethod"]:checked').value;
-        const total = parseFloat(document.getElementById('modal-total').innerText.replace('$',''));
+        if(!mesa) return alert("Indique MESA o CLIENTE");
+        const metodo = document.querySelector('input[name="pay"]:checked').value;
+        const total = parseFloat(document.getElementById('modal-total-amt').innerText);
 
         const pedido = {
           cliente: mesa,
           metodo: metodo,
           total: total,
+          vendedor: currentUser, // <--- ENVIAMOS EL USUARIO
           items: cart
         };
 
-        // UI Loading
         const btn = document.querySelector('#paymentModal .btn-success');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> PROCESANDO...';
+        btn.disabled = true; btn.innerText = "ENVIANDO...";
 
-        google.script.run.withSuccessHandler(res => {
-          alert('VENTA REGISTRADA CORRECTAMENTE');
+        google.script.run.withSuccessHandler(() => {
+          alert("VENTA GUARDADA");
           location.reload();
         }).registrarVentaCompleta(pedido);
       }
 
-      // --- COCINA (Real Time Polling) ---
-      function startPolling() {
+      // --- COCINA ---
+      function startKitchenPolling() {
         setInterval(() => {
-          const view = document.getElementById('view-kitchen');
-          if (!view.classList.contains('d-none')) {
-            refreshCocina();
+          if(!document.getElementById('view-kitchen').classList.contains('d-none')) {
+            google.script.run.withSuccessHandler(renderCocina).getPedidosCocina();
           }
-        }, 5000); // 5 segundos
-      }
-
-      function refreshCocina() {
-        google.script.run.withSuccessHandler(renderCocina).getPedidosCocina();
+        }, 5000);
       }
 
       function renderCocina(pedidos) {
-        const container = document.getElementById('kitchen-list');
-        if (pedidos.length === 0) {
-          container.innerHTML = '<div class="alert alert-success text-center">Todo despachado. Cocina al día.</div>';
-          return;
-        }
-
-        let html = '';
+        const cont = document.getElementById('kitchen-list');
+        if(pedidos.length === 0) return cont.innerHTML = '<div class="alert alert-success text-center">Todo Listo</div>';
+        
+        let html = "";
         pedidos.forEach(p => {
           html += `
-            <div class="kitchen-row shadow-sm">
+            <div class="kitchen-row">
               <div>
-                <h5 class="fw-bold mb-1">${p.cantidad} x ${p.producto}</h5>
-                <span class="badge bg-secondary text-uppercase">${p.mesa}</span>
-                <small class="text-muted ms-2"><i class="far fa-clock"></i> ${p.hora}</small>
+                <h5 class="fw-bold mb-1">${p.cantidad}x ${p.producto}</h5>
+                <span class="badge bg-dark">${p.mesa}</span> <span class="text-muted small">${p.hora}</span>
               </div>
-              <button class="btn btn-success btn-sm px-4" onclick="despachar('${p.id_detalle}')">
-                LISTO
-              </button>
-            </div>
-          `;
+              <button class="btn btn-success" onclick="google.script.run.withSuccessHandler(()=>startKitchenPolling()).marcarDespachado('${p.id_detalle}')">LISTO</button>
+            </div>`;
         });
-        
-        // Evita parpadeo si es idéntico (Simple diff check)
-        if (container.innerHTML !== html) container.innerHTML = html;
+        if(cont.innerHTML !== html) cont.innerHTML = html;
       }
-
-      function despachar(id) {
-        google.script.run.withSuccessHandler(refreshCocina).marcarDespachado(id);
-      }
-
     </script>
   </body>
 </html>
