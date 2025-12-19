@@ -1,88 +1,379 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Picantería POS</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-      body { background: #f8f9fa; padding: 20px; }
-      .card-cocina { border-left: 5px solid #ffc107; margin-bottom: 10px; }
-      .delivery-badge { background-color: #dc3545; color: white; }
+      :root {
+        --primary-color: #d35400; /* Naranja quemado (Picantería) */
+        --secondary-color: #2c3e50; /* Azul oscuro (Elegante) */
+        --bg-color: #f4f6f9;
+        --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      }
+
+      body {
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg-color);
+        overflow: hidden; /* Evita doble scroll */
+      }
+
+      /* --- SIDEBAR (Menú Lateral) --- */
+      #wrapper {
+        display: flex;
+        width: 100%;
+        height: 100vh;
+      }
+
+      #sidebar-wrapper {
+        min-height: 100vh;
+        width: 250px;
+        background-color: var(--secondary-color);
+        color: white;
+        transition: all 0.3s;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar-heading {
+        padding: 1.5rem;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        background-color: rgba(0,0,0,0.2);
+        color: #ecf0f1;
+        border-bottom: 3px solid var(--primary-color);
+      }
+
+      .list-group-item {
+        background-color: transparent;
+        color: #bdc3c7;
+        border: none;
+        padding: 15px 20px;
+        font-size: 1.1rem;
+        transition: 0.2s;
+        cursor: pointer;
+      }
+
+      .list-group-item:hover, .list-group-item.active {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateX(5px);
+      }
+
+      .list-group-item i {
+        width: 25px;
+        text-align: center;
+      }
+
+      /* --- CONTENIDO PRINCIPAL --- */
+      #page-content-wrapper {
+        width: 100%;
+        overflow-y: auto;
+        padding: 0;
+      }
+
+      .navbar {
+        background-color: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        padding: 10px 20px;
+      }
+
+      /* --- TARJETAS DE PRODUCTOS (POS) --- */
+      .product-card {
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+      }
+
+      .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        border: 2px solid var(--primary-color);
+      }
+
+      .product-img-placeholder {
+        height: 80px;
+        background-color: #ecf0f1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #95a5a6;
+      }
+
+      .price-tag {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+
+      /* --- TICKET DE VENTA --- */
+      .ticket-container {
+        height: calc(100vh - 100px);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .ticket-body {
+        flex-grow: 1;
+        overflow-y: auto;
+        background-color: white;
+      }
+
+      .table-ticket th {
+        background-color: var(--secondary-color);
+        color: white;
+        position: sticky;
+        top: 0;
+      }
+      
+      .btn-delete {
+        color: #e74c3c;
+        cursor: pointer;
+      }
+      .btn-delete:hover { color: #c0392b; }
+
+      /* --- MONITOR DE COCINA --- */
+      .kitchen-card {
+        border-left: 6px solid #f1c40f; /* Amarillo por defecto (Pendiente) */
+        margin-bottom: 15px;
+      }
+      
+      .kitchen-card.urgent { border-left-color: #e74c3c; } /* Rojo (Urgente) */
+      
+      .kitchen-header {
+        font-weight: bold;
+        font-size: 1.2rem;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      /* --- SCROLLBAR PERSONALIZADO (Estilo App) --- */
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: #f1f1f1; }
+      ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
     </style>
   </head>
   <body>
-    <div class="container">
-      <h2 class="text-center mb-4">Picantería System 🔥</h2>
-      
-      <div class="row">
-        <div class="col-md-5">
-          <div class="card p-4 shadow-sm">
-            <h4>Nueva Venta</h4>
-            <div class="mb-3">
-              <label>Producto</label>
-              <input type="text" id="producto" class="form-control" placeholder="Ej: Encebollado Mix">
-            </div>
-            <div class="mb-3">
-              <label>Cantidad</label>
-              <input type="number" id="cantidad" class="form-control" value="1">
-            </div>
-            <div class="mb-3">
-              <label>Tipo de Entrega</label>
-              <select id="tipo" class="form-select">
-                <option value="Local">Para comer aquí</option>
-                <option value="Delivery">Delivery App</option>
-                <option value="Domicilio">Domicilio Propio</option>
-              </select>
-            </div>
-            <button onclick="enviarPedido()" class="btn btn-primary w-100">Enviar a Cocina</button>
-          </div>
-        </div>
 
-        <div class="col-md-7">
-          <h4>Monitor de Cocina 👨‍🍳</h4>
-          <div id="lista-cocina">
+    <div id="wrapper">
+      
+      <div id="sidebar-wrapper">
+        <div class="sidebar-heading">
+          <i class="fas fa-pepper-hot"></i> PICANTERÍA
+        </div>
+        <div class="list-group list-group-flush mt-3">
+          <a class="list-group-item active" onclick="cambiarModulo('venta', this)">
+            <i class="fas fa-cash-register"></i> Ventas / Caja
+          </a>
+          <a class="list-group-item" onclick="cambiarModulo('cocina', this)">
+            <i class="fas fa-fire-burner"></i> Monitor Cocina
+          </a>
+          <a class="list-group-item" onclick="cambiarModulo('egresos', this)">
+            <i class="fas fa-wallet"></i> Egresos
+          </a>
+          <a class="list-group-item" onclick="cambiarModulo('admin', this)">
+            <i class="fas fa-cogs"></i> Configuración
+          </a>
+        </div>
+        <div class="mt-auto p-3 text-center text-secondary small">
+          Sistema v1.0
+        </div>
+      </div>
+
+      <div id="page-content-wrapper">
+        
+        <nav class="navbar">
+          <button class="btn btn-outline-secondary btn-sm" id="menu-toggle"><i class="fas fa-bars"></i></button>
+          <span class="ms-auto fw-bold text-secondary" id="reloj">12:00 PM</span>
+        </nav>
+
+        <div class="container-fluid p-4">
+          
+          <div id="modulo-venta" class="modulo">
+            <div class="row h-100">
+              <div class="col-md-7 mb-3">
+                <input type="text" class="form-control form-control-lg mb-3 shadow-sm" placeholder="🔍 Buscar plato o bebida...">
+                
+                <div class="row g-3" id="grid-productos">
+                  <div class="col-4 col-lg-3">
+                    <div class="card product-card h-100" onclick="agregarAlCarrito('Encebollado Mixto', 4.50)">
+                      <div class="product-img-placeholder"><i class="fas fa-bowl-food"></i></div>
+                      <span class="price-tag">$4.50</span>
+                      <div class="card-body p-2 text-center">
+                        <h6 class="card-title m-0 small fw-bold">Encebollado Mixto</h6>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-4 col-lg-3">
+                    <div class="card product-card h-100" onclick="agregarAlCarrito('Jugo Naranja', 1.50)">
+                      <div class="product-img-placeholder text-warning"><i class="fas fa-glass-water"></i></div>
+                      <span class="price-tag">$1.50</span>
+                      <div class="card-body p-2 text-center">
+                        <h6 class="card-title m-0 small fw-bold">Jugo Naranja</h6>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-5">
+                <div class="card shadow border-0 ticket-container">
+                  <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <span class="fw-bold"><i class="fas fa-receipt me-2"></i>Orden Actual</span>
+                    <span class="badge bg-danger">Mesa #4</span>
+                  </div>
+                  
+                  <div class="ticket-body p-0">
+                    <table class="table table-striped table-hover table-ticket mb-0">
+                      <thead>
+                        <tr>
+                          <th>Cant.</th>
+                          <th>Producto</th>
+                          <th>Total</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody id="lista-carrito">
+                        </tbody>
+                    </table>
+                  </div>
+
+                  <div class="card-footer bg-white p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <span class="h5 text-muted">Total a Pagar:</span>
+                      <span class="h2 fw-bold text-success" id="total-pagar">$0.00</span>
+                    </div>
+                    
+                    <div class="row g-2">
+                      <div class="col-6">
+                        <select class="form-select fw-bold">
+                          <option value="Local">🍽️ Servirse</option>
+                          <option value="Llevar">🥡 Para Llevar</option>
+                          <option value="Delivery">🛵 Delivery</option>
+                        </select>
+                      </div>
+                      <div class="col-6">
+                        <button class="btn btn-success w-100 fw-bold py-2" onclick="cobrar()">
+                          <i class="fas fa-check me-2"></i>COBRAR
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+
+          <div id="modulo-cocina" class="modulo d-none">
+            <h3 class="mb-3 text-secondary border-bottom pb-2">Cola de Pedidos</h3>
+            <div class="row" id="area-cocina">
+              
+              <div class="col-md-4 col-sm-6">
+                <div class="card shadow-sm kitchen-card p-3">
+                  <div class="kitchen-header mb-2">
+                    <span>Mesa 4</span>
+                    <span class="badge bg-warning text-dark">05:20 min</span>
+                  </div>
+                  <ul class="list-unstyled">
+                    <li><strong>2x</strong> Encebollado Mixto</li>
+                    <li><strong>1x</strong> Porción Chifles</li>
+                  </ul>
+                  <button class="btn btn-outline-success w-100 btn-sm mt-2">Marcar Despachado</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div id="modulo-egresos" class="modulo d-none">
+             <div class="card shadow-sm p-4" style="max-width: 600px; margin: 0 auto;">
+               <h4 class="text-danger mb-4"><i class="fas fa-minus-circle me-2"></i>Registrar Salida de Dinero</h4>
+               <div class="mb-3">
+                 <label>Motivo del Gasto</label>
+                 <select class="form-select">
+                   <option>Compra de Pescado/Marisco</option>
+                   <option>Verduras</option>
+                   <option>Bebidas</option>
+                   <option>Pago Personal</option>
+                   <option>Servicios Básicos</option>
+                 </select>
+               </div>
+               <div class="mb-3">
+                 <label>Descripción</label>
+                 <input type="text" class="form-control" placeholder="Ej: Pago a proveedor Juan">
+               </div>
+               <div class="mb-3">
+                 <label>Monto ($)</label>
+                 <input type="number" class="form-control text-danger fw-bold" placeholder="0.00">
+               </div>
+               <button class="btn btn-danger w-100">Registrar Gasto</button>
+             </div>
+          </div>
+
         </div>
       </div>
     </div>
 
     <script>
-      function enviarPedido() {
-        const datos = {
-          producto: document.getElementById('producto').value,
-          cantidad: document.getElementById('cantidad').value,
-          tipo: document.getElementById('tipo').value,
-          precio: 5.00 // Aquí puedes dinamizar con tu tabla de productos a
-        };
+      // Reloj
+      setInterval(() => {
+        document.getElementById('reloj').innerText = new Date().toLocaleTimeString();
+      }, 1000);
+
+      // Cambiar entre pestañas (Venta, Cocina, Egresos)
+      function cambiarModulo(moduloId, elemento) {
+        // Ocultar todos
+        document.querySelectorAll('.modulo').forEach(el => el.classList.add('d-none'));
+        // Mostrar el seleccionado
+        document.getElementById('modulo-' + moduloId).classList.remove('d-none');
         
-        google.script.run.withSuccessHandler(() => {
-          alert("¡Pedido enviado!");
-          cargarCocina();
-        }).registrarPedido(datos);
+        // Actualizar menú activo
+        document.querySelectorAll('.list-group-item').forEach(el => el.classList.remove('active'));
+        elemento.classList.add('active');
       }
 
-      function cargarCocina() {
-        google.script.run.withSuccessHandler(pedidos => {
-          const contenedor = document.getElementById('lista-cocina');
-          contenedor.innerHTML = "";
-          pedidos.forEach(p => {
-            contenedor.innerHTML += `
-              <div class="card card-cocina p-3 shadow-sm">
-                <div class="d-flex justify-content-between">
-                  <h5>${p.cantidad}x ${p.producto}</h5>
-                  <span class="badge delivery-badge">${p.tipo}</span>
-                </div>
-                <button onclick="completar('${p.id}')" class="btn btn-sm btn-success mt-2">Marcar Listo</button>
-              </div>`;
-          });
-        }).obtenerPedidosPendientes();
+      // Funciones DEMO para el carrito (Solo visual por ahora)
+      let total = 0;
+      function agregarAlCarrito(nombre, precio) {
+        const tbody = document.getElementById('lista-carrito');
+        const row = `
+          <tr>
+            <td>1</td>
+            <td>${nombre}</td>
+            <td>$${precio.toFixed(2)}</td>
+            <td><i class="fas fa-times btn-delete" onclick="this.parentElement.parentElement.remove()"></i></td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+        total += precio;
+        document.getElementById('total-pagar').innerText = '$' + total.toFixed(2);
       }
 
-      function completar(id) {
-        google.script.run.withSuccessHandler(cargarCocina).marcarComoListo(id);
+      function cobrar() {
+        if(total === 0) return alert("El carrito está vacío");
+        alert("Enviando pedido a cocina y registrando venta...");
+        // Aquí conectaremos con Google Apps Script luego
+        document.getElementById('lista-carrito').innerHTML = "";
+        total = 0;
+        document.getElementById('total-pagar').innerText = "$0.00";
       }
-
-      // Recargar cocina cada 30 segundos
-      setInterval(cargarCocina, 30000);
-      window.onload = cargarCocina;
     </script>
   </body>
 </html>
